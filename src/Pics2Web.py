@@ -5,7 +5,7 @@ import jinja2 as j
 
 CONTENT_FOLDER='.\\content'
 BUILD_FOLDER='.\\build'
-GALLERY_WEB_PATH='.\\assets\\gallery'
+GALLERY_WEB_PATH='.\\assets\\gallery\\'
 
 def generate_imgs_src(content_folder=CONTENT_FOLDER):
     """Generate web-ready list of full filepaths for jinja2.
@@ -17,6 +17,7 @@ def generate_imgs_src(content_folder=CONTENT_FOLDER):
     for root, dirs, files in os.walk(CONTENT_FOLDER):
         for filename in files:
             result.append(os.path.join(GALLERY_WEB_PATH, filename))
+            # result.append(filename)
     print('log: generated file paths for', len(result), 'images')
     return result
 
@@ -33,9 +34,11 @@ def generate_HTML(images):
     file_loader = j.FileSystemLoader('./src/templates')
     env = j.Environment(loader=file_loader)
 
-    template = env.get_template('index.template.html')
+    template = env.get_template('nano.template.html')
     stream = template.render(
-        images=images,
+        title        = 'Pics2Web Gallery',
+        itemsBaseURL = GALLERY_WEB_PATH,
+        images       = images,
     )
 
     with open(
