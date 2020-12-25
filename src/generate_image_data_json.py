@@ -1,27 +1,48 @@
 import os
+from distutils.dir_util import copy_tree
 from glob import glob1
 import jinja2 as j
 
 CONTENT_FOLDER='.\\content'
-DESTINATION='.\\build'
+BUILD_FOLDER='.\\build'
 GALLERY_WEB_PATH='.\\assets\\gallery'
 
-def generate_imgs_src(content_folder):
-    """Generate web-ready list of full filepaths for jinja2
+def generate_imgs_src(content_folder=CONTENT_FOLDER):
+    """Generate web-ready list of full filepaths for jinja2.
 
     Args:
         content_folder (string): path to content folder
     """
-
     result = []
     for root, dirs, files in os.walk(CONTENT_FOLDER):
         for filename in files:
             result.append(os.path.join(GALLERY_WEB_PATH, filename))
-    print(result[0])
+    print('log: generated file paths for', len(result), 'images')
+    return result
 
+def copy_content(origin=CONTENT_FOLDER, destination=os.path.join(BUILD_FOLDER, GALLERY_WEB_PATH)):
+    """Copy content to build folder for deployment on the web.
 
-generate_imgs_src(CONTENT_FOLDER)
+    Args:
+        origin ([type]): [description]
+        destination ([type]): [description]
+    """
+    copy_tree(origin, destination)
 
+def generate_HTML(images):
+    file_loader = j.FileSystemLoader('./src/templates')
+    env = j.Environment(loader=file_loader)
+
+    template = env.get_template('index.template.html')
+    stream = template.render(
+        images=images,
+    )
+
+    with open(
+        os.path.join(BUILD_FOLDER, 'index.html'), 'w', encoding='utf-8'
+    ) as out:
+        out.write(stream)
+    print('log: generated HTML')
 
 
 def procedure():
@@ -34,19 +55,9 @@ def procedure():
 
     """
 
+    copy_content()
+    generate_HTML(images=generate_imgs_src())
 
 
-    # file_loader = j.FileSystemLoader('./src/templates')
-    # env = j.Environment(loader=file_loader)
-
-    # template = env.get_template('index.template.html')
-    # stream = template.render(
-    #     images=[1,2,3,4,5],
-    # )
-
-    # with open(
-    #     os.path.join(DESTINATION, 'index.html'), 'w', encoding='utf-8'
-    # ) as out:
-    #     out.write(stream)
-
-# procedure()
+   
+procedure()
